@@ -1,0 +1,25 @@
+.searchbar {
+  input {
+    border-color: #d8a400 !important;
+  }
+}
+.borderless {
+  .item {
+    > i.icon {
+      color: #fff;
+      text-shadow: 0px 0px 2px rgba(0,0,0,0.4);
+    }
+
+    b {
+      color: #fff !important; 
+      text-shadow: 0px 0px 2px rgba(0,0,0,0.4);
+      font-size: 1.4rem;
+    }
+  }
+}
+.truncated {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical
+}
