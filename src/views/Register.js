@@ -84,7 +84,7 @@ class Register extends React.Component {
     return (
       <div>
         <div style={{textAlign: 'center', marginTop: '15%'}} >
-          <Image src="/images/builder1.svg" style={{width: '80px', filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.35))', display: 'inline-block'}}/>
+          <Image as = 'a' href = '/' src="/images/builder1.svg" style={{width: '80px', filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.35))', display: 'inline-block'}}/>
           <Header as="h1" 
             style={{margin: '0', marginLeft: '14px', color: '#fff', fontSize: '3rem', display: 'inline-block', verticalAlign: 'middle'}}
           >

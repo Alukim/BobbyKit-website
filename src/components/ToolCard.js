@@ -15,11 +15,14 @@ export default class ToolCard extends React.Component {
   }
   render() {
 
-    const { tool } = this.props;
+    const { tool, update } = this.props;
     console.log(this.props)
     console.log(tool.imageId)
+    console.log(update)
+
+    let cardHref = update === false ? `/tool/${tool.id}` :`/tool/${tool.id}`
     return (
-      <Card href={`/tool/${tool.id}`} fluid style={{ margin: '7px 0' }}>
+      <Card href={cardHref} fluid style={{ margin: '7px 0' }}>
         <Image src={tool.imageId ? `${BASE_API_URL}/image/${tool.imageId}` : '/images/tools.jpg'} />
         <Card.Content>
           <Card.Header><span className="truncated" style={{fontSize: '1.1rem'}}>{tool.name}</span></Card.Header>

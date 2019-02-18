@@ -7,7 +7,7 @@ export default class ToolsList extends React.Component {
   
 
   render() {
-    let { tools } = this.props;
+    let { tools, update } = this.props;
     let toolsLeft = [];
     let toolsRight = [];
     
@@ -16,21 +16,21 @@ export default class ToolsList extends React.Component {
         ? toolsLeft.push(tool)
         : toolsRight.push(tool)
     });
-    
+    console.log(update)
     return (
       <Grid>
         <Grid.Row style={{paddingTop: '0'}}>        
           <Grid.Column width={8} style={{ padding:'7px', paddingRight: '3.5px' }}> 
           {
             toolsLeft.map((tool, i) => (
-              <ToolCard key={`tool-left-${i}`} tool={tool} />
+              <ToolCard key={`tool-left-${i}`} tool={tool} update = {update}/>
             ))
           }
           </Grid.Column>
           <Grid.Column width={8} style={{ padding:'7px', paddingLeft: '3.5px' }}> 
           {
             toolsRight.map((tool, i) => (
-              <ToolCard key={`tool-right-${i}`} tool={tool} />
+              <ToolCard key={`tool-right-${i}`} tool={tool} update = {update}/>
             ))
           }
           </Grid.Column>     

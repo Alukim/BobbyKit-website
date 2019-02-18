@@ -107,7 +107,7 @@ class Home extends React.Component {
             <Segment basic style={{padding: '7px 0'}}>
               <Dimmer style={{height: '110%', minHeight: '100vh'}} active={this.state.sidebarOpen} onClickOutside={this.toggleSidebar} />
               <Container style={{paddingTop: '34px'}}>
-                <ToolsList tools={this.state.tools}/>
+                <ToolsList tools={this.state.tools} update = {false}/>
               </Container>  
             </Segment>
           </Sidebar.Pusher>

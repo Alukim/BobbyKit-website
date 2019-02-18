@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image } from 'semantic-ui-react';
-import { Container, Header, Input, Icon, Grid, Label, Segment, Rating, Button, Modal } from 'semantic-ui-react';
+import { Container, Header, Input, Icon, Grid, Label, Segment, Rating, Button, Modal, Link } from 'semantic-ui-react';
 import Navbar from '../components/Navbar';
 import axios from 'axios';
 import { withGoogleMap, GoogleMap, Marker } from "react-google-maps"
@@ -37,8 +37,11 @@ class Tool extends React.Component {
       modelHeader: '',
       errorList: [],
       error: false,
+      statusError: null,
       firstName: null,
-      lastName: null
+      lastName: null,
+      userImageId: null,
+      email: null
     };
     this.onChange = this.onChange.bind(this);
     this.datePickHandler = this.datePickHandler.bind(this);
@@ -48,12 +51,12 @@ class Tool extends React.Component {
 
   onChange (e, { name, value }) { this.setState({ [name]: value }); }
 
-  handleError(response) {
+  handleError(response, status) {
     let errors = new Array();
 
     errors.push(response.message)
 
-    this.setState({errorList: errors});
+    this.setState({errorList: errors, statusError: status});
   }
 
   componentDidMount() {
@@ -91,12 +94,17 @@ class Tool extends React.Component {
         availabilityOn: response.data.availabilityOn,
         isMarkerShow: true,
         lat: response.data.latitude,
-        lng: response.data.longitude
+        lng: response.data.longitude,
+        firstName: response.data.user.firstName,
+        lastName: response.data.user.lastName,
+        userImageId: response.data.user.imageId,
+        email: response.data.user.email
       })
       this.initMap({lat: response.data.latitude, lng: response.data.longitude})
     })
     .catch(error => {
-      this.handleError(error.response.data);
+      console.log(error.response)
+      this.handleError(error.response.data, error.response.status);
       this.setState({visible: true, error: true})
     });
   }
@@ -139,7 +147,8 @@ class Tool extends React.Component {
       this.setState({visible: true, modelHeader: 'Zarezerwowane narzędzie!!!', error: false})
     })
     .catch(error => {
-      this.handleError(error.response.data);
+      console.log(error.response)
+      this.handleError(error.response.data, error.response.status);
       this.setState({addReservationIsLoading: false});
       this.setState({visible: true, modelHeader: 'Występił błąd w czasie rezerwacji!', error: true});
     });
@@ -148,7 +157,17 @@ class Tool extends React.Component {
   closeHandler() { 
     console.log('Rezerwacja!');
     console.log(this.state.range);
+    console.log(this.state.statusError)
     this.setState({visible: false, errorList: null});
+    if(this.state.statusError === 404) {
+      this.setState({statusError: null});
+      location.replace('/')
+    } else if(this.state.statusError === 401) {
+      this.setState({statusError: null});
+      location.replace('/login')
+    } else {
+      this.setState({statusError: null});
+    }
   }
 
   render() {
@@ -171,6 +190,8 @@ class Tool extends React.Component {
       </Label>
     );
     let imageSrc = this.state.imageId === null ? '/images/tools.jpg' : `${url}/image/${this.state.imageId}`;
+    let userImageSrc = this.state.userImageId === null ? '/images/user.svg' : `${url}/image/${this.state.userImageId}`
+    let mailHref = `mailto:${this.state.email}?subject=Oferta ${this.state.name} na BobbyKit;body=Co chcesz napisać do użytkownika` 
     return (
       <div>
       <Modal
@@ -234,12 +255,13 @@ class Tool extends React.Component {
           <Segment style={{ marginTop: 0, marginBottom: '0px' }}>
             <Container>
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', textAlign: 'center'}}>
-                  <div><Image style={{ height: '50px', marginRight: '10px' }} src="/images/user.svg"/></div>
-                  <div style={{ height: '50px', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                  <div><Image style={{ height: '60px', marginRight: '10px' }} src={userImageSrc}/></div>
+                  <div style={{ height: '60px', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                     <div>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Bartosz Kowalski</span>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{this.state.firstName} {this.state.lastName}</span>
                     </div>
                     <div><Rating defaultRating={3} maxRating={5} disabled /></div>
+                    <div><a href={mailHref}>Kontakt</a></div>
                   </div>
               </div>
             </Container>

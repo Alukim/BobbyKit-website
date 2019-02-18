@@ -53,12 +53,12 @@ export default class OfferForm extends React.Component {
     }];
   }
 
-  handleError(response) {
+  handleError(response, status) {
     let errors = new Array();
 
     errors.push(response.message)
 
-    this.setState({errorList: errors});
+    this.setState({errorList: errors, statusError: status});
   }
 
   componentDidMount() {
@@ -126,6 +126,7 @@ export default class OfferForm extends React.Component {
       modelHeader: '',
       errorList: [],
       error: false,
+      statusError: null,
       offerId: null,
     };   
 
@@ -212,7 +213,7 @@ export default class OfferForm extends React.Component {
         this.setState({visible: true, modelHeader: 'Dodano ofertę', error: true})
       })
       .catch(error => {
-        this.handleError(error.response.data);
+        this.handleError(error.response.data, error.response.status);
         this.setState({addReservationIsLoading: false});
         this.setState({visible: true, modelHeader: 'Występił błąd w czasie dodawania oferty!', error: false})
       });    
@@ -221,8 +222,15 @@ export default class OfferForm extends React.Component {
   closeHandler() { 
     console.log('Offerta!');
     this.setState({visible: false, errorList: null});
-    if(this.state.offerId)
+    if(this.state.statusError === 200) {
       location.replace(`tool/${this.state.offerId}`)
+      this.setState({statusError: null});
+    } else if(this.state.statusError === 401) {
+      location.replace(`/login`)      
+      this.setState({statusError: null});
+    } else {
+      this.setState({statusError: null});
+    }
   }
 
   render() {
