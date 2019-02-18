@@ -35,7 +35,8 @@ class Tool extends React.Component {
       addReservationIsLoading: false,
       visible: false,
       modelHeader: '',
-      errorList: []
+      errorList: [],
+      error: false
     };
     this.onChange = this.onChange.bind(this);
     this.datePickHandler = this.datePickHandler.bind(this);
@@ -133,12 +134,12 @@ class Tool extends React.Component {
     .then(response => {
       console.log(response.data)
       this.setState({addReservationIsLoading: false});
-      this.setState({visible: true, modelHeader: 'Zarezerwowane narzędzie!!!'})
+      this.setState({visible: true, modelHeader: 'Zarezerwowane narzędzie!!!', error: false})
     })
     .catch(error => {
       this.handleError(error.response.data);
       this.setState({addReservationIsLoading: false});
-      this.setState({visible: true, modelHeader: 'Występił błąd w czasie rezerwacji!'})
+      this.setState({visible: true, modelHeader: 'Występił błąd w czasie rezerwacji!', error: true});
     });
   }
 
@@ -155,6 +156,13 @@ class Tool extends React.Component {
     else
       ReservationBox = <Input name="range" value={this.state.range} type='text' placeholder='Na ile dni wypożyczas ?' onChange={this.onChange} />
 
+    let ButtonBox = null;
+    if(this.state.error === false)
+      ButtonBox = <Button onClick={this.closeHandler} negative> Ok </Button>
+    else
+      ButtonBox = <Button onClick={this.closeHandler} positive> Ok </Button>
+  
+
     let labels = this.state.parameters.map((parameter, i) =>
       <Label key={i} size="large" style={{ background: 'white', fontSize: '1.1rem', boxShadow: '0px 0px 1px 0px rgba(0,0,0,0.3)' }}>
         <span style={{ fontWeight: 'normal' }}>{parameter.key}: </span>{parameter.value}
@@ -169,14 +177,12 @@ class Tool extends React.Component {
         closeOnDimmerClick={false}
         onClose={this.closeHandler}
       >
-        <Modal.Header>{this.state.modelHeader}}</Modal.Header>
+        <Modal.Header>{this.state.modelHeader}</Modal.Header>
         <Modal.Content>
           {this.state.errorList}
         </Modal.Content>
         <Modal.Actions>
-          <Button onClick={this.closeHandler} positive>
-            Ok
-          </Button>
+          {ButtonBox}
         </Modal.Actions>
       </Modal>
 

@@ -62,7 +62,7 @@ class Register extends React.Component {
     })
       .then(response => {
         this.setState({visible: true, error: false})
-        localStorage.setItem('token', response.access_token);
+        localStorage.setItem('token', response.data.access_token);
         setTimeout(() => {
           window.location.replace('/');}, 1000);
       })

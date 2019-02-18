@@ -11,7 +11,7 @@
     "lint": "eslint ./src",
     "posttest": "npm run lint",
     "serve:dev": "webpack-dev-server --open --env dev",
-    "serve:dist": "webpack-dev-server --env dist --host 0.0.0.0 --port 8000",
+    "serve:dist": "webpack-dev-server --inline --env dist --host 0.0.0.0 --port 8000 --public bobbykit.northeurope.cloudapp.azure.com",
     "build:dist": "npm run clean && webpack --config webpack.config.js --env dist && npm run copy",
     "start": "npm run serve:dev",
     "production": "npm run build:dist && npm run serve:dist"

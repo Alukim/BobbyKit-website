@@ -2,14 +2,14 @@ import React from 'react';
 import places from 'places.js';
 import { 
   Container, Grid, Form, Icon, Button, Header, Divider, Input, 
-  Segment, Select, TextArea, Image, Label, Popup
+  Segment, Select, TextArea, Modal, Label, Popup
 } from 'semantic-ui-react';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/OfferForm.scss';
+import axios from 'axios';
 
 const blue = '#0079DB';
 const yellow = '#FFC100';
-let interval = null;
 
 const url = `${BASE_API_URL}`;
 
@@ -52,6 +52,15 @@ export default class OfferForm extends React.Component {
       text:'Pojemność'
     }];
   }
+
+  handleError(response) {
+    let errors = new Array();
+
+    errors.push(response.message)
+
+    this.setState({errorList: errors});
+  }
+
   componentDidMount() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -111,29 +120,27 @@ export default class OfferForm extends React.Component {
       center: {lat: 50.6847882, lng: 17.8707963},
       range: {from: null, to: null},
       city: 'Gliwice',
-      success: false,
-      error: false,
       time: 2,
-      availabilityOn: 0
+      availabilityOn: 0,
+      visible: false,
+      modelHeader: '',
+      errorList: [],
+      error: false,
+      offerId: null,
     };   
 
     this.onChange = this.onChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.handleChangeDate = this.handleChangeDate.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.addParameter = this.addParameter.bind(this);
     this.removeParameter = this.removeParameter.bind(this);
+    this.closeHandler = this.closeHandler.bind(this);
   }
 
   onChange (e, { name, value }) { this.setState({ [name]: value }); }
 
   handleChange(event) {    
     this.reader.readAsDataURL(event.target.files[0]);
-  }
-
-  handleChangeDate(range) {
-    console.log(range);
-    this.setState({ range });
   }
 
   addParameter(event) {    
@@ -190,20 +197,32 @@ export default class OfferForm extends React.Component {
         }
       };
       console.log(offerBody);
-    fetch(`${url}/offer`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem("token")}`
-      },  
-      body: JSON.stringify(offerBody)
-    }).then(res => {
-      if(res.ok) {
-        this.setState({success: true});
-      } else {
-        this.setState({error: true});
-      }
-    });      
+      axios({
+        url: `${url}/offer`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        data: offerBody
+      })
+      .then(response => {
+        console.log(response.data)
+        this.setState({offerId: response.data.id});
+        this.setState({visible: true, modelHeader: 'Dodano ofertę', error: true})
+      })
+      .catch(error => {
+        this.handleError(error.response.data);
+        this.setState({addReservationIsLoading: false});
+        this.setState({visible: true, modelHeader: 'Występił błąd w czasie dodawania oferty!', error: false})
+      });    
+  }
+
+  closeHandler() { 
+    console.log('Offerta!');
+    this.setState({visible: false, errorList: null});
+    if(this.state.offerId)
+      location.replace(`tool/${this.state.offerId}`)
   }
 
   render() {
@@ -211,8 +230,29 @@ export default class OfferForm extends React.Component {
     let inputBoxStyles = this.state.image 
       ? { background: `url(${this.state.image})`, backgroundSize: 'cover' }
       : { }
-    if(!this.state.error && !this.state.success) {
-      return <Form name="offerForm" onSubmit={event => event.preventDefault()}>        
+    
+    let ButtonBox = null;
+    if(this.state.error === false)
+      ButtonBox = <Button onClick={this.closeHandler} negative> Ok </Button>
+    else
+      ButtonBox = <Button onClick={this.closeHandler} positive> Ok </Button>
+      return(
+        <div>
+        <Modal
+          open={this.state.visible}
+          closeOnEscape={true}
+          closeOnDimmerClick={false}
+          onClose={this.closeHandler}
+        >
+        <Modal.Header>{this.state.modelHeader}</Modal.Header>
+        <Modal.Content>
+          {this.state.errorList}
+        </Modal.Content>
+        <Modal.Actions>
+          {ButtonBox}
+        </Modal.Actions>
+      </Modal>
+        <Form name="offerForm" onSubmit={event => event.preventDefault()}>        
         <Header as="h3" textAlign="center">Opis narzędzia</Header>
         <Segment>
           <div className="description">
@@ -305,37 +345,6 @@ export default class OfferForm extends React.Component {
           <Button onClick={this.handleSubmit} size="large" style={{background: yellow, boxShadow: '0 4px 20px rgba(0,0,0,.6)'}}>Dodaj ofertę</Button>  
         </div>
       </Form>
-    } else if(this.state.success) {
-      interval = setInterval(() => {
-        this.setState({time: --this.state.time});
-      }, 1000);
-      setTimeout(() => {
-        location.replace('/');
-        clearInterval(interval)
-      }, 2000);
-      return <div>
-        <img style={{display: 'block', margin: '0 auto', marginTop: '45%', width: '250px'}} src="/images/tick.svg"/>
-        <p style={{marginTop: '14px', textAlign: 'center'}}>
-          Oferta została dodana :)<br/>
-          Strona odświeży się za {this.state.time > 0 ? this.state.time : 0}s.
-        </p>
       </div>
-    } else if(this.state.error) {
-      interval = setInterval(() => {
-        this.setState({time: --this.state.time});
-      }, 1000);
-      setTimeout(() => {
-        location.replace('/add');
-        clearInterval(interval)
-      }, 2000);
-
-      return <div>
-        <img style={{display: 'block', margin: '0 auto', marginTop: '45%', width: '250px'}} src="/images/padlock.svg"/>
-        <p style={{marginTop: '14px', textAlign: 'center'}}>
-          Wystąpił nieznany problem.<br/>
-          Strona odświeży się za {this.state.time > 0 ? this.state.time : 0}s.
-        </p>
-      </div>
-    }
+      )}
   }
-}
