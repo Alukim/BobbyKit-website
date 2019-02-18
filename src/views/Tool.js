@@ -36,7 +36,9 @@ class Tool extends React.Component {
       visible: false,
       modelHeader: '',
       errorList: [],
-      error: false
+      error: false,
+      firstName: null,
+      lastName: null
     };
     this.onChange = this.onChange.bind(this);
     this.datePickHandler = this.datePickHandler.bind(this);
@@ -168,7 +170,7 @@ class Tool extends React.Component {
         <span style={{ fontWeight: 'normal' }}>{parameter.key}: </span>{parameter.value}
       </Label>
     );
-    let imageSrc = this.state.imageId === null ? '/images/tools.jpg' : `${url}/Image/${this.state.imageId}`;
+    let imageSrc = this.state.imageId === null ? '/images/tools.jpg' : `${url}/image/${this.state.imageId}`;
     return (
       <div>
       <Modal
